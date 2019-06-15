@@ -44,6 +44,32 @@ class Api::V1::BlogsController < ApplicationController
 
   def filter_blogs
     @blogs = Blog.all
+    page_no = params[:page] || 1
+    per_page = params[:per_page] || 15
+    @blogs = @blogs.order(created_at: :desc)
+    if params[:search].present?
+      @blogs = @blogs.where("title ILIKE :search OR content ILIKE :search",
+                            search: "%#{params[:search]}%")
+    end
+    handle_date_stuff
+    @blogs = @blogs.page(page_no).per(per_page).without_count
+  end
+
+  def handle_date_stuff
+    if params[:from].present?
+      date = valid_date(params[:from])
+      @blogs = @blogs.from_date(date) if date.present?
+    end
+    if params[:to].present?
+      date = valid_date(params[:to])
+      @blogs = @blogs.to_date(date) if date.present?
+    end
+  end
+
+  def valid_date(date)
+    Date.parse(date)
+  rescue ArgumentError
+    nil
   end
 
   def jsonify(obj)

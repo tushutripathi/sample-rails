@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_06_15_183025) do
+ActiveRecord::Schema.define(version: 2019_06_15_204756) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gin"
@@ -25,6 +25,9 @@ ActiveRecord::Schema.define(version: 2019_06_15_183025) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "slug"
+    t.index ["content"], name: "index_blogs_on_content", opclass: :gist_trgm_ops, using: :gist
+    t.index ["slug"], name: "index_blogs_on_slug", unique: true
+    t.index ["title"], name: "index_blogs_on_title", opclass: :gist_trgm_ops, using: :gist
   end
 
 end
