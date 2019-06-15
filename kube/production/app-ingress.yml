@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: react-rails-framework-app
+  namespace: react-rails-production
+  labels:
+    app: react-rails-app
+spec:
+  tls:
+    - secretName: react-rails-ingress-ssl
+  backend:
+    serviceName: react-rails-app-backend
+    servicePort: 8080

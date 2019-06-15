@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: react-rails-deploy-tasks
+spec:
+  template:
+    metadata:
+      name: react-rails-deploy-tasks
+      labels:
+        name: react-rails-deploy-tasks
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: production-worker-pool-1
+      restartPolicy: Never
+      containers:
+        - name: react-rails-deploy-tasks-runner
+          image: $IMAGE
+          command: ["/var/app/deploy/run-tasks.sh"]
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: app-oauth-credentials
+              mountPath: /secrets/app
+              readOnly: true
+            - name: tmp
+              mountPath: /var/app/tmp
+          envFrom:
+            - configMapRef:
+                name: react-rails-app-config
+      volumes:
+        - name: app-oauth-credentials
+          secret:
+            secretName: react-rails-app-oauth-credentials
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
+        - name: tmp
+          emptyDir:
+      # [END volumes]

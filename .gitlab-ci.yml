@@ -1,0 +1,128 @@
+image: docker:latest
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay
+
+stages:
+  - test
+  - build
+
+test:
+  image: "ruby:2.6.2-stretch"
+  stage: test
+  variables:
+    RAILS_ENV: "test"
+  # cache gems and node_modules for next usage
+  cache:
+    # https://docs.gitlab.com/ee/ci/yaml/
+    key: common_cache_key
+    untracked: true
+    policy: pull
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq postgresql postgresql-contrib libpq-dev cmake
+    - ruby -v
+    - which ruby
+    - service postgresql start
+    - su -c "psql -c \"ALTER ROLE postgres WITH PASSWORD 'postgres';\"" postgres
+    - gem install bundler --no-document
+    - RAILS_ENV=test bundle install
+    - RAILS_ENV=test bundle exec rake db:create db:schema:load
+  script:
+    - RAILS_ENV=test bundle exec rspec
+
+build_and_deploy_staging:
+  stage: build
+  image: google/cloud-sdk
+  services:
+    - docker:dind
+  variables:
+    # When using dind service we need to instruct docker, to talk with the
+    # daemon started inside of the service. The daemon is available with
+    # a network connection instead of the default /var/run/docker.sock socket.
+    #
+    # The 'docker' hostname is the alias of the service container as described at
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
+    #
+    # Note that if you're using Kubernetes executor, the variable should be set to
+    # tcp://localhost:2375 because of how Kubernetes executor connects services
+    # to the job container
+    DOCKER_HOST: tcp://localhost:2375/
+    # When using dind, it's wise to use the overlayfs driver for
+    # improved performance.
+    GOOGLE_PROJECT_ID: ""
+    GOOGLE_CLUSTER_NAME: ""
+    GOOGLE_COMPUTE_ZONE: ""
+    GOOGLE_AUTH: ""
+  cache:
+    # https://docs.gitlab.com/ee/ci/yaml/
+    key: common_cache_key
+    untracked: true
+    policy: pull
+  before_script:
+    - docker info
+  script:
+    - echo "$GOOGLE_AUTH" > gcloud-service-key.json # Google Cloud service accounts
+    - gcloud auth activate-service-account --key-file gcloud-service-key.json
+    - gcloud config set project $GOOGLE_PROJECT_ID
+    - gcloud --quiet config set container/cluster $GOOGLE_CLUSTER_NAME
+    - gcloud config set compute/zone $GOOGLE_COMPUTE_ZONE
+    - gcloud --quiet container clusters get-credentials $GOOGLE_CLUSTER_NAME
+    # - gcloud --quiet container clusters get-credentials $GOOGLE_CLUSTER_NAME
+    # - gcloud builds submit . --config=cloudbuild.yaml --substitutions _IMAGE_NAME=$CI_PROJECT_NAME,_VERSION=$(echo $CI_COMMIT_SHA | cut -c8-25)
+    - export IMAGE=gcr.io/image_path/react-rails-app:$CI_COMMIT_SHA
+    - gcloud auth configure-docker
+    - docker build -t react-rails-app -f Dockerfile .
+    - docker tag react-rails-app $IMAGE
+    - docker push $IMAGE
+    - bash kube/deploy.sh $CI_COMMIT_SHA staging cluster_name
+  environment:
+    name: staging
+  only:
+    - lolololol
+
+build_and_deploy_production:
+  stage: build
+  image: google/cloud-sdk
+  services:
+    - docker:dind
+  variables:
+    # When using dind service we need to instruct docker, to talk with the
+    # daemon started inside of the service. The daemon is available with
+    # a network connection instead of the default /var/run/docker.sock socket.
+    #
+    # The 'docker' hostname is the alias of the service container as described at
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
+    #
+    # Note that if you're using Kubernetes executor, the variable should be set to
+    # tcp://localhost:2375 because of how Kubernetes executor connects services
+    # to the job container
+    DOCKER_HOST: tcp://localhost:2375/
+    # When using dind, it's wise to use the overlayfs driver for
+    # improved performance.
+    GOOGLE_PROJECT_ID: ""
+    GOOGLE_CLUSTER_NAME: ""
+    GOOGLE_COMPUTE_REGION: ""
+    GOOGLE_AUTH: ""
+  before_script:
+    - docker info
+  script:
+    - echo "$GOOGLE_AUTH" > gcloud-service-key.json # Google Cloud service accounts
+    - gcloud auth activate-service-account --key-file gcloud-service-key.json
+    - gcloud config set project $GOOGLE_PROJECT_ID
+    - gcloud --quiet config set container/cluster $GOOGLE_CLUSTER_NAME
+    - gcloud config set compute/region $GOOGLE_COMPUTE_REGION
+    - gcloud --quiet container clusters get-credentials $GOOGLE_CLUSTER_NAME --region $GOOGLE_COMPUTE_REGION
+    # - gcloud --quiet container clusters get-credentials $GOOGLE_CLUSTER_NAME
+    # - gcloud builds submit . --config=cloudbuild.yaml --substitutions _IMAGE_NAME=$CI_PROJECT_NAME,_VERSION=$(echo $CI_COMMIT_SHA | cut -c8-25)
+    - export IMAGE=gcr.io/image_path/react-rails-app:$CI_COMMIT_SHA
+    - gcloud auth configure-docker
+    - docker build -t react-rails-app -f Dockerfile .
+    - docker tag react-rails-app $IMAGE
+    - docker push $IMAGE
+    - bash kube/deploy.sh $CI_COMMIT_SHA prod cluster_name
+  environment:
+    name: production
+  only:
+    - lolololol2

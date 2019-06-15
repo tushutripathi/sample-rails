@@ -1,0 +1,88 @@
+# Copyright 2015 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
+
+# This file configures the react-rails application . The frontend serves
+# public web traffic.
+
+# The bookshelf frontend replication controller ensures that at least 3
+# instances of the bookshelf app are running on the cluster.
+# For more info about Pods see:
+#   https://cloud.google.com/container-engine/docs/pods/
+# For more info about Deployments:
+#   https://kubernetes.io/docs/user-guide/deployments/
+
+# [START kubernetes_deployment]
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: react-rails-app
+  namespace: react-rails-production
+  labels:
+    app: react-rails-app
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: react-rails-app
+        type: webserver
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: standard-8-pool-1
+      containers:
+        - name: react-rails-app
+          # Replace  with your project ID or use `make template`
+          image: gcr.io/..path to the image
+          # This setting makes nodes pull the docker image every time before
+          # starting the pod. This is useful when debugging, but should be turned
+          # off in production.
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: app-oauth-credentials
+              mountPath: /secrets/app
+              readOnly: true
+          envFrom:
+            - configMapRef:
+                name: react-rails-app-config
+            - secretRef:
+                name: react-rails-secrets
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /api/v3/health
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/v3/health
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 30
+      # [START volumes]
+      volumes:
+        - name: app-oauth-credentials
+          secret:
+            secretName: app-oauth-credentials
+      # [END volumes]
+# [END kubernetes_deployment]

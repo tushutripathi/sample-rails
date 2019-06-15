@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-rails-app-backend
+  namespace: react-rails-production
+  labels:
+    app: react-rails-app
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: react-rails-app
+    type: webserver
+  type: NodePort
