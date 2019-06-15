@@ -33,5 +33,22 @@ module RubyRails
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    config.time_zone = "Mumbai"
+
+    # CORS
+    config.middleware.insert_before 0, Rack::Cors do
+      allow do
+        origins "localhost:3000", "localhost:3001", "127.0.0.1:3001"
+        resource "*", headers: :any, methods: %i[get post put delete options]
+      end
+    end
+
+    config.autoload_paths << Rails.root.join("app/models/services")
   end
+end
+
+Rswag::Api::Engine.config.middleware.use Rack::Auth::Basic do |username, pwd|
+  username == ENV.fetch("USER_ADMIN") { "test" } &&
+      pwd == ENV.fetch("USER_ADMIN_PWD") { "test" }
 end
