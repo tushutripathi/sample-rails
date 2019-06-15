@@ -1,0 +1,8 @@
+--no-private
+--protected
+--title "Sample Rails React Blog"
+--exclude "application_controller.rb"
+--exclude "application_record.rb"
+app/controllers/**/*.rb
+app/models/**/*.rb -
+README.md

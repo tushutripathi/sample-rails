@@ -1,0 +1,128 @@
+AllCops:
+  Exclude:
+    - 'app/views/**/*'
+    - 'config/**/*'
+    - 'bin/*'
+    - 'db/**/*'
+    - 'log/**/*'
+    - 'node_modules/**/*'
+    - 'public/**/*'
+    - 'scripts/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - '.git/**/*'
+    - 'frontend/**/*'
+
+Naming/MethodName:
+  EnforcedStyle: snake_case
+  SupportedStyles:
+    - snake_case
+    - camelCase
+
+# Load order is important
+Bundler/OrderedGems:
+  Enabled: false
+
+#################### LAYOUT ######################
+
+# space -> { abc }, no_space -> {abc}
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+  EnforcedStyleForEmptyBraces: no_space
+  SupportedStyles:
+    - space
+    - no_space
+Layout/TrailingBlankLines:
+  Enabled: false
+# No space makes the method definition shorter and differentiates
+# from a regular assignment.
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: no_space
+
+
+#################### STYLE ######################
+
+# both compact and nested allowed
+Style/ClassAndModuleChildren:
+  Enabled: False
+# will be default in Ruby 3
+Style/FrozenStringLiteralComment:
+  Enabled: false
+# Too spammy
+Style/Documentation:
+  Enabled: false
+# When conditions are longer, guard clause looks messy
+Style/GuardClause:
+  Enabled: false
+Style/ExpandPathArguments:
+  Enabled: false
+# it's unnecessary, and doesn't improve readability
+Style/FormatStringToken:
+  Enabled: false
+Style/RescueStandardError:
+  Enabled: false
+# and/or is more readable imo
+Style/AndOr:
+  Enabled: false
+Style/Next:
+  Enabled: false
+Style/IfUnlessModifier:
+  Enabled: false
+# Single quotes being faster is hardly measurable and only affects parse time.
+# Enforcing double quotes reduces the times where you need to change them
+# when introducing an interpolation. Use single quotes only if their semantics
+# are needed.
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+# We do not need to support Ruby 1.9, so this is good to use.
+Style/SymbolArray:
+  Enabled: true
+# Enforcing the names of variables? To single letter ones? Just no.
+Style/SingleLineBlockParams:
+  Enabled: false
+Style/ConditionalAssignment:
+  Enabled: false
+
+
+#################### METRICS ######################
+
+Metrics/CyclomaticComplexity:
+  Max: 15
+Metrics/PerceivedComplexity:
+  Max: 15
+Metrics/LineLength:
+  Max: 100
+  IgnoreCopDirectives: true
+# default 10 is too low
+Metrics/MethodLength:
+  CountComments: false
+  Max: 20
+  Exclude:
+    - 'spec/integration/*'
+Metrics/BlockLength:
+  CountComments: false
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
+Metrics/AbcSize:
+  Max: 40
+  Exclude:
+    - 'spec/**/*'
+# The guiding principle of classes is SRP, SRP can't be accurately measured by LoC
+Metrics/ClassLength:
+  Max: 500
+Metrics/ModuleLength:
+  Max: 200
+
+
+#################### RAILS ######################
+
+# rails cop
+Rails:
+  Enabled: true
+Rails/DynamicFindBy:
+  Whitelist:
+    - find_all_by_custom_tags
+# "a/b/c" looks cleaner than (a, b, c)
+Rails/FilePath:
+  Enabled: false

@@ -28,6 +28,12 @@ gem 'bootsnap', '>= 1.4.2', require: false
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  # for documentation
+  gem 'yard'
+  # For code styling and linting
+  gem 'rubocop'
+  # This can be used to empty tables in a database.
+  gem "database_cleaner"
 end
 
 group :development do
