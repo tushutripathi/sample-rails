@@ -1,0 +1,456 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API V1",
+    "version": "v1",
+    "description": "Blogs API"
+  },
+  "paths": {
+    "/api/v1/blogs": {
+      "get": {
+        "summary": "Fetch all blogs on basis of filters",
+        "tags": [
+          "Blogs"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "description": "dd/mm/yyyy",
+            "required": false
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "description": "dd/mm/yyyy",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All the blogs",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "type",
+                      "attributes"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "attributes": {
+                        "type": "object",
+                        "required": [
+                          "title",
+                          "content"
+                        ],
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Make a new blog",
+        "tags": [
+          "Blogs"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "new_blog",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "example": "My Pretty Blog"
+                    },
+                    "content": {
+                      "type": "string",
+                      "example": "Welcome to my blog."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Blog created",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "type",
+                    "attributes"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "title",
+                        "content"
+                      ],
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable entity",
+            "schema": {
+              "type": "object",
+              "required": [
+                "error_code",
+                "message"
+              ],
+              "properties": {
+                "status": {
+                  "error_code": "string"
+                },
+                "error": {
+                  "message": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/blogs/{blog_id}": {
+      "get": {
+        "summary": "Fetch a specific blog by id",
+        "tags": [
+          "Blogs"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "blog_id",
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "api_token": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog fetched",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "type",
+                    "attributes"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "title",
+                        "content"
+                      ],
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blog not found",
+            "schema": {
+              "type": "object",
+              "required": [
+                "error_code",
+                "message"
+              ],
+              "properties": {
+                "status": {
+                  "error_code": "string"
+                },
+                "error": {
+                  "message": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update blog",
+        "tags": [
+          "Blogs"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "blog_id",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "updated_blog",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "example": "My Pretty Blog"
+                    },
+                    "content": {
+                      "type": "string",
+                      "example": "Welcome to my blog."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog updated",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "type",
+                    "attributes"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "title",
+                        "content"
+                      ],
+                      "properties": {
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blog not found",
+            "schema": {
+              "type": "object",
+              "required": [
+                "error_code",
+                "message"
+              ],
+              "properties": {
+                "status": {
+                  "error_code": "string"
+                },
+                "error": {
+                  "message": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete blog",
+        "tags": [
+          "Blogs"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "blog_id",
+            "in": "path",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Blog deleted"
+          },
+          "404": {
+            "description": "Blog not found",
+            "schema": {
+              "type": "object",
+              "required": [
+                "error_code",
+                "message"
+              ],
+              "properties": {
+                "status": {
+                  "error_code": "string"
+                },
+                "error": {
+                  "message": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "api_token": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "tags": [
+    {
+      "name": "Blogs",
+      "description": "Blog related APIs"
+    }
+  ]
+}

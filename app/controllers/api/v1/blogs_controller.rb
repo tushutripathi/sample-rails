@@ -3,6 +3,7 @@ class Api::V1::BlogsController < ApplicationController
   before_action :filter_blogs, only: %i[index]
   before_action :set_blog, only: %i[show update destroy]
 
+  # /blogs?search=sth&from=12-05-2018&to=20-06-2019&per_page=10&page_no=3
   def index
     render(json: jsonify(@blogs))
   end
@@ -10,7 +11,7 @@ class Api::V1::BlogsController < ApplicationController
   def create
     @blog = Blog.new(blog_params)
     if @blog.save
-      render(json: jsonify(@blog))
+      render(json: jsonify(@blog), status: :created)
     else
       render_error(:unprocessable_entity, @blog)
     end
@@ -39,7 +40,7 @@ class Api::V1::BlogsController < ApplicationController
   end
 
   def blog_params
-    params.permit(:title, :content)
+    params.require(:data).permit(:title, :content)
   end
 
   def filter_blogs

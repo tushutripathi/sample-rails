@@ -19,7 +19,7 @@ Rails.application.routes.draw do
   end
 
   namespace :docs do
-    get "v3", to: redirect("/api-docs/v3")
+    get "v1", to: redirect("/api-docs/v1")
   end
 
   get "*path", to: "application#fallback_index_html", constraints: ->(request) do

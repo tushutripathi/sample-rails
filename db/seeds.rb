@@ -18,7 +18,9 @@ def upsert(model, params)
   model.find_by(title: params[:title])
 end
 
-10.times do
-  upsert(Blog, {title: Faker::Games::Pokemon.unique.name,
-  content: Faker::ChuckNorris.fact})
+unless Rails.env == "test"
+  10.times do
+    upsert(Blog, {title: Faker::Games::Pokemon.unique.name,
+    content: Faker::ChuckNorris.fact})
+  end
 end

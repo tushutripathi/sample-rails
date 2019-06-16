@@ -7,6 +7,9 @@ module ControllerCommon
   end
 
   def render_error(error_code, message="")
+    if message.is_a?(ActiveRecord::Base)
+      message = message.errors.full_messages[0]
+    end
     render(json: {error_code: Rack::Utils.status_code(error_code).to_s,
                   message: message}, status: error_code)
   end

@@ -17,9 +17,39 @@ RSpec.configure do |config|
       swagger: '2.0',
       info: {
         title: 'API V1',
-        version: 'v1'
+        version: 'v1',
+        description: "Blogs API"
+        # description: File.read(Rails.root.join("FRAMEWORK.md"))
       },
-      paths: {}
+      paths: {},
+      securityDefinitions: {
+          api_token: {
+              type: :apiKey,
+              name: "Authorization",
+              in: :header
+          }
+      },
+      tags: [
+          {
+              name: "Blogs",
+              description: "Blog related APIs"
+          }
+      ]
     }
   }
+end
+
+def err_schema_common
+  {
+      type: :object,
+      required: %w[error_code message],
+      properties: {
+          status: {error_code: :string},
+          error: {message: :string}
+      }
+  }
+end
+
+def auth_token
+  "Bearer #{ENV['SELF_API_TOKEN']}"
 end
